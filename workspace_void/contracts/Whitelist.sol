@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.4;
 
-import "./ERC20.sol";
-import "./Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 // *********************************
 // Whitelist Presale Contract
@@ -18,7 +18,7 @@ contract Whitelist is Ownable {
     // proceeds go to treasury
     address public treasury;
     // Void Token Contract
-    address public voidToken;
+    address public pVoidToken;
     // the certificate
     //NRT public nrt;
     // ratio quote in 1000
@@ -74,7 +74,7 @@ contract Whitelist is Ownable {
         uint256 _minInvest,
         uint256 _presalePrice,
         address _treasury,
-        address _voidToken
+        address _pVoidToken
     ) {
         investToken = _investToken;
         startTime = _startTime;
@@ -85,7 +85,7 @@ contract Whitelist is Ownable {
         maxInvestorCap = _maxInvestorCap; 
         minInvest = _minInvest;
         treasury = _treasury;
-        voidToken = _voidToken;
+        pVoidToken = _pVoidToken;
         presalePrice = _presalePrice;
         endTime = startTime + duration;
 
@@ -157,11 +157,11 @@ contract Whitelist is Ownable {
             ),
             "transfer failed"
         );
-
+ 
         uint256 issueAmount = investAmount * presalePrice;
 
         // Send out the void token
-        ERC20(voidToken).transfer(
+        ERC20(pVoidToken).transfer(
             msg.sender,
             issueAmount
         );
@@ -199,9 +199,9 @@ contract Whitelist is Ownable {
         );
     }
 
-    function withdrawVoidToTreasury(uint256 amount) public onlyOwner {
+    function withdrawpVoidToTreasury(uint256 amount) public onlyOwner {
         require(
-            ERC20(voidToken).transfer(treasury, amount),
+            ERC20(pVoidToken).transfer(treasury, amount),
             "transfer failed"
         );
     }
@@ -214,7 +214,7 @@ contract Whitelist is Ownable {
     }
 
     function toggleSale() public onlyOwner {
-        if(block.timestamp > endTime ) {
+        if(block.timestamp > endTime || block.timestamp <  startTime) {
             saleEnabled = false;
             emit SaleEnabled(false, block.timestamp);
         } else {
@@ -231,6 +231,33 @@ contract Whitelist is Ownable {
     function toggleSaleOn() public onlyOwner {
         saleEnabled = true;
         emit SaleEnabled(true, block.timestamp);
+    }
+
+    // View functions // 
+
+    function isSaleOn() public view returns (bool) {
+        return saleEnabled;
+    }
+
+    function saleStartTime() public view returns (uint256) {
+        return startTime;
+    }
+
+    function isUserWhitelisted(address _user) public view returns (bool) {
+        return whitelisted[_user]; 
+    }
+
+    function investorInvested(address _user) public view returns (uint256) {
+        InvestorInfo storage investor = investorInfoMap[_user];
+        return investor.amountInvested;
+    }
+
+    function returnMumberWhitelisted() public view returns (uint256) {
+        return numWhitelisted;
+    }
+
+    function returnNumInvested() public view returns (uint256) {
+        return numInvested;
     }
 
 
