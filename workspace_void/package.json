@@ -1,0 +1,15 @@
+{
+  "name": "void",
+  "version": "1.0.0",
+  "description": "Void Token",
+  "main": "",
+  "author": "kai",
+  "license": "",
+  "dependencies": {
+    "hardhat": "^2.8.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.2",
+    "dotenv": "^14.3.2",
+    "@openzeppelin/contracts": "^4.4.0"
+  }
+
+
